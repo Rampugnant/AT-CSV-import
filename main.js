@@ -1,5 +1,6 @@
 const fs = require ('fs');
 const papa = require ('papaparse');
+const filter = require ('./filters');
 
 function main () {
     let dataobject = [];
@@ -17,35 +18,20 @@ function main () {
                 
                 for (rec of results.data){
 
-                    let pushval = testandclean(rec);
+                    let pushval = filter.testandclean(rec);
 
                     if(pushval){
                         dataobject.push(pushval);
                     }
 
-
-                    let reject = 0;
-
-                    if (!rec.zodiac){
-                        reject++;
-                    }
-                    if (!isNaN(rec.articleNum)){
-                        reject++;
-                    }
-
                 }
 
-                console.log(results.data);
+                console.log(dataobject);
 
             }
         })
 
     } )
-
-    function testandclean (obj) {
-        return 1;
-    }
-
 
 
 }

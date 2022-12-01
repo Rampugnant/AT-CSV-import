@@ -5,7 +5,9 @@
 */
 
 function testandclean(obj) {
-
-
-
+    obj.articleNum += "";
+    console.log(obj.articleNum);
+    return obj;
 }
+
+module.exports = { testandclean };
