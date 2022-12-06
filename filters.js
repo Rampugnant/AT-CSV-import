@@ -5,9 +5,23 @@
 */
 
 function testandclean(obj) {
-    obj.articleNum += "";
-    console.log(obj.articleNum);
-    return obj;
+
+    let reject = 0
+
+    // cleans
+    if(obj.articleNum || obj.articleNum >= 0){ obj.articleNum += "";}
+    if(obj.birthDate){ obj.birthDate = new Date(obj.birthDate);}
+
+    // filters - tests records to make sure we want them 
+    if(!obj.birthDate){ reject++; }
+    if(obj.lastname === null){ reject++; }
+
+    // finally, mark as rejected
+    if(reject >= 1) {obj.reject = true;}
+    
 }
+
+
+
 
 module.exports = { testandclean };
