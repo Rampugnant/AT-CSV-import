@@ -17,7 +17,7 @@ function parseFile(){
                     complete: function(results) {
                         for (let i = 0; i < results.data.length; i++){
                             // casts types and marks recs based on filters
-                            filter.testandclean(results.data[i]);
+                            filter.testandcleanfile(results.data[i]);
                             
                             // removes rejected records
                             if (results.data[i].reject){
@@ -51,11 +51,14 @@ function comparison (fileRecs, atRecs) {
 
     for (rec of fileRecs) {
         let updateCheck = 0;
+
+        // create computed unique id that will match atrec computed unique id
+        let recid = rec.lastname + rec.articleNum;
         
         for (atrec of atRecs) {
 
             // Check if rec from file matches airtable rec (atrec)
-            if(rec.id === atrec.fields.id){
+            if(recid === atrec.fields.id){
                 // increase updateCheck to show that this record does not
                 // need to be created.
                 updateCheck++;
@@ -99,16 +102,15 @@ function comparison (fileRecs, atRecs) {
 }
 
 function buildByTen (array, table, func) {
-    let decimate = array.length()/10;
-
+    let decimate = Math.floor(array.length/10);
     if (decimate && func){
         for(let i = 1; i <= decimate; i++){
-            console.log(array.splice(0,9));    
-            //func(array.splice(0,9),table);
+            //console.log(array.splice(0,9));    
+            func(array.splice(0,9),table);
         }
     } else if (func) {
-        console.log(array.splice(0, array.length()-1));
-        //func(array.splice(0, array.length()-1), table);
+        //console.log(array.splice(0, array.length-1));
+        func(array.splice(0, array.length), table);
     }
 }
 

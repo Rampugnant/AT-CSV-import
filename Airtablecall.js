@@ -1,6 +1,7 @@
 const Airtable = require('airtable');
 const {apiKey} = require('./config');
 const main = require('./main');
+const filters = require('./filters');
 
 // Define Airtable Base specifics
 Airtable.configure({
@@ -22,15 +23,18 @@ function getATRecords() {
     base(source).select({
         view: view
     }).eachPage(function page(records, fetchNextPage) {
-        records.forEach(function(record) {
-            // test to make sure the record isn't empty
-            if (record._rawJson.fields.id) { 
-                // be sure to translate any dates into JS Date objects
-                record._rawJson.fields.birthDate = new Date (record._rawJson.fields.birthDate);
-                // add the record to the return array
-                sourceRecordsMatch.push(record._rawJson); 
+        for (let i = 0; i < records.length; i++){
+            // casts types and marks recs based on filters
+            filters.testandcleanAT(records[i]._rawJson.fields);
+            
+            // removes rejected records
+            if (records[i]._rawJson.fields.reject){
+                records[i].splice(i, 1);
+            } else {
+                sourceRecordsMatch.push(records[i]._rawJson);
             }
-        })
+        }
+
         fetchNextPage();
     }, function done(err) {
         if (err) {console.log(err); return}
@@ -46,13 +50,14 @@ function getATRecords() {
             // [1] is the records to update array
             if (arrs[0].length !== 0) {
                 // send create array to be paced and passed to create method.
-                main.buildByTen(arrs[0], source, createAllRecords)
                 console.log("Create this many records: " + arrs[0].length);
+                main.buildByTen(arrs[0], source, createAllRecords);
+                
             }
             if (arrs[1].length !== 0) {
                 // send update array to be paced and passed to update method.
-                main.buildByTen(arrs[1], source, updateAllRecords)
                 console.log("Update this many records: " + arrs[1].length);
+                main.buildByTen(arrs[1], source, updateAllRecords);
         
             }
         })
