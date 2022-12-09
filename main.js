@@ -3,13 +3,10 @@ const util = require ('util');
 const papa = require ('papaparse');
 const filter = require ('./filters');
 
-
-
 function parseFile(){
     // Read in file and parse in the call back
     const readFile = util.promisify(fs.readFile);
 
-    let fileRecs;
     const customPromise = new Promise(function(resolve, reject){
         readFile('./test.csv', 'utf-8')
             .then(function(data){
@@ -21,7 +18,8 @@ function parseFile(){
                         for (let i = 0; i < results.data.length; i++){
                             // casts types and marks recs based on filters
                             filter.testandclean(results.data[i]);
-            
+                            
+                            // removes rejected records
                             if (results.data[i].reject){
                                 results.data.splice(i, 1);
                             }
@@ -33,6 +31,7 @@ function parseFile(){
             })
             
             .then(function (recs){
+                // once everything above is complete, return the clean records
                 resolve(recs);
             })
             
@@ -44,8 +43,6 @@ function parseFile(){
     return customPromise;
     
 }
-
-
 
 function comparison (fileRecs, atRecs) {
     
@@ -65,7 +62,6 @@ function comparison (fileRecs, atRecs) {
                 
                 // iterate through fields and compare
                 for (field of Object.keys(rec)){
-                    // if the field values don't match
                     
                     // account for Dates, which can't be compared as easily
                     if (rec[field] instanceof Date){
@@ -90,7 +86,7 @@ function comparison (fileRecs, atRecs) {
             
         }
 
-        // check to see if rec was updated - if not, add to create array
+        // check to see if rec was matched with existing atrec - if not, add to create array
         if (updateCheck === 0) {
             createArray.push({fields : {...rec}});
         }
@@ -102,31 +98,20 @@ function comparison (fileRecs, atRecs) {
 
 }
 
-module.exports = { comparison, parseFile };
+function buildByTen (array, table, func) {
+    let decimate = array.length()/10;
+
+    if (decimate && func){
+        for(let i = 1; i <= decimate; i++){
+            console.log(array.splice(0,9));    
+            //func(array.splice(0,9),table);
+        }
+    } else if (func) {
+        console.log(array.splice(0, array.length()-1));
+        //func(array.splice(0, array.length()-1), table);
+    }
+}
+
+module.exports = { comparison, parseFile, buildByTen };
 
 
-/*
-    ingest file
-    parse ingest
-    transform results
-    filter results
-
-    call Airtable
-    get records
-    push fields to array
-
-    !!! Once both previous processes are done
-
-    Iterate through results
-    iterate through array
-    match current result to array item (if exists)
-        check fields to see if it needs updating
-            push current result to update array
-    not matched current result
-        push current result to create array
-    
-    As each array gets to 10
-        call update and create
-
-
-*/
